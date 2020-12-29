@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "asyncio-pipe"
+version = "0.0.1"
+description = "Non-blocking IPC with Asyncio"
+authors = ["Roger Iyengar <ri@rogeriyengar.com>", "Félix Voituret <fvoituret@deezer.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+
+[tool.poetry.dev-dependencies]
+pytest-asyncio = "^0.14.0"
+pytest = "^6.2.1"
+mypy = "^0.790"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
