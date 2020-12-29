@@ -30,9 +30,11 @@ class AsyncConnection(object):
             self,
             sync_connection: Connection,
             loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
-        self._loop: asyncio.AbstractEventLoop = loop
-        if self._loop is None:
+        self._loop: asyncio.AbstractEventLoop
+        if loop is None:
             self._loop = asyncio.get_event_loop()
+        else:
+            self._loop = loop
         self._sync_connection: Connection = sync_connection
         self._read_event: asyncio.Event = asyncio.Event()
         self._write_event: asyncio.Event = asyncio.Event()
@@ -62,12 +64,12 @@ class AsyncConnection(object):
     @property
     def readable(self) -> bool:
         """True if the connection is readable"""
-        return self._sync_connection._readable
+        return self._sync_connection.readable
 
     @property
     def writable(self) -> bool:
         """True if the connection is writable"""
-        return self._sync_connection._writable
+        return self._sync_connection.writable
 
     async def send(self, obj: Any) -> None:
         """
