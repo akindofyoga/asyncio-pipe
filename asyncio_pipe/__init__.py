@@ -5,12 +5,12 @@
 
 import asyncio
 
-from multiprocessing import Pipe
-from multiprocessing.connection import Connection
+from multiprocessing import Pipe as SyncPipe
+from multiprocessing.connection import Connection as SyncConnection
 from typing import Any, Optional, Tuple
 
 
-class AsyncConnection(object):
+class Connection(object):
     """
         Asynchronous wrapper over multiprocessing.Connection class.
         Register reader and write over given connection handle to
@@ -28,14 +28,14 @@ class AsyncConnection(object):
 
     def __init__(
             self,
-            sync_connection: Connection,
+            sync_connection: SyncConnection,
             loop: Optional[asyncio.AbstractEventLoop] = None) -> None:
         self._loop: asyncio.AbstractEventLoop
         if loop is None:
             self._loop = asyncio.get_event_loop()
         else:
             self._loop = loop
-        self._sync_connection: Connection = sync_connection
+        self._sync_connection: SyncConnection = sync_connection
         self._read_event: asyncio.Event = asyncio.Event()
         self._write_event: asyncio.Event = asyncio.Event()
         self._loop.add_reader(
@@ -148,11 +148,11 @@ class AsyncConnection(object):
         return size
 
 
-def AsyncPipe(
+def Pipe(
         duplex: bool = True,
         loop: Optional[asyncio.AbstractEventLoop] = None) -> Tuple[
-            AsyncConnection,
-            Connection]:
+            Connection,
+            SyncConnection]:
     """
         Returns pair of connection objects at either end of a pipe.
         The first returned connection in asynchronous and thus can be used
@@ -165,8 +165,8 @@ def AsyncPipe(
                 Event loop to attach connection to.
 
         Returns:
-            Tuple[AsyncConnection, Connection]:
+            Tuple[Connection, multiprocessing.Connection]:
                 Created connection pair.
     """
-    c1, c2 = Pipe(duplex=duplex)
-    return AsyncConnection(c1, loop=loop), c2
+    c1, c2 = SyncPipe(duplex=duplex)
+    return Connection(c1, loop=loop), c2

@@ -4,9 +4,9 @@
 """ Basic connection and pipe test cases. """
 
 import pytest
+import multiprocessing
 
-from asyncio_pipe import AsyncConnection, AsyncPipe
-from multiprocessing import Pipe
+from asyncio_pipe import Connection, Pipe
 
 
 async def verify_duplex_connection(async_connection, connection):
@@ -21,10 +21,10 @@ async def verify_duplex_connection(async_connection, connection):
 @pytest.mark.asyncio
 async def test_async_connection():
     c1, c2 = Pipe()
-    await verify_duplex_connection(AsyncConnection(c1), c2)
+    await verify_duplex_connection(Connection(c1), c2)
 
 
 @pytest.mark.asyncio
 async def test_async_pipe():
-    c1, c2 = AsyncPipe()
+    c1, c2 = multiprocessing.Pipe()
     await verify_duplex_connection(c1, c2)
