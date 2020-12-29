@@ -5,7 +5,8 @@
 
 import asyncio
 
-from multiprocessing import Connection, Pipe
+from multiprocessing import Pipe
+from multiprocessing.connection import Connection
 from typing import Any, Optional, Tuple
 
 
