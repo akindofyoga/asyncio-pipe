@@ -14,7 +14,9 @@ class Connection:
 
     async def recv(self):
         """Receive a (picklable) object"""
-        await self._event.wait()
+        if not self._connection.poll():
+            self._event.wait()
+
         result = self._connection.recv()
         self._event.clear()
         return result
@@ -29,6 +31,9 @@ class Connection:
 
     async def poll(self, timeout=0.0):
         """Whether there is any input available to be read"""
+        if self._connection.poll():
+            return True
+
         try:
             await asyncio.wait_for(self._event.wait(), timeout=timeout)
         except asyncio.TimeoutError:
@@ -43,7 +48,9 @@ class Connection:
         """
         Receive bytes data as a bytes object.
         """
-        await self._event.wait()
+        if not self._connection.poll():
+            await self._event.wait()
+
         result = self._connection.recv_bytes(maxlength)
         self._event.clear()
         return result
@@ -53,7 +60,9 @@ class Connection:
         Receive bytes data into a writeable bytes-like object.
         Return the number of bytes read.
         """
-        await self._event.wait()
+        if not self._connection.poll():
+            await self._event.wait()
+
         result = self._connection.recv_bytes_into(buf, offset)
         self._event.clear()
         return result
