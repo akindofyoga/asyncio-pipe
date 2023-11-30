@@ -14,12 +14,11 @@ class Connection:
 
     async def recv(self):
         """Receive a (picklable) object"""
-        if not self._connection.poll():
+        while not self._connection.poll():
             self._event.wait()
+            self._event.clear()
 
-        result = self._connection.recv()
-        self._event.clear()
-        return result
+        return self._connection.recv()
 
     def fileno(self):
         """File descriptor or handle of the connection"""
@@ -38,7 +37,7 @@ class Connection:
             await asyncio.wait_for(self._event.wait(), timeout=timeout)
         except asyncio.TimeoutError:
             return False
-        return True
+        return self._connection.poll()
 
     def send_bytes(self, buf, offset=0, size=None):
         """Send the bytes data from a bytes-like object"""
@@ -48,21 +47,19 @@ class Connection:
         """
         Receive bytes data as a bytes object.
         """
-        if not self._connection.poll():
+        while not self._connection.poll():
             await self._event.wait()
+            self._event.clear()
 
-        result = self._connection.recv_bytes(maxlength)
-        self._event.clear()
-        return result
+        return self._connection.recv_bytes(maxlength)
 
     async def recv_bytes_into(self, buf, offset=0):
         """
         Receive bytes data into a writeable bytes-like object.
         Return the number of bytes read.
         """
-        if not self._connection.poll():
+        while not self._connection.poll():
             await self._event.wait()
+            self._event.clear()
 
-        result = self._connection.recv_bytes_into(buf, offset)
-        self._event.clear()
-        return result
+        return self._connection.recv_bytes_into(buf, offset)
