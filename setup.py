@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="asyncio-pipe",
-    version="0.0.2",
+    version="0.0.3",
     author="Roger Iyengar",
     author_email="ri@rogeriyengar.com",
     description="Non-blocking IPC with Asyncio",

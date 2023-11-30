@@ -10,14 +10,20 @@ class Connection:
 
     def send(self, obj):
         """Send a (picklable) object"""
+
         self._connection.send(obj)
+
+    async def _wait_for_input(self):
+        """Wait until there is an input available to be read"""
+
+        while not self._connection.poll():
+            await self._event.wait()
+            self._event.clear()
 
     async def recv(self):
         """Receive a (picklable) object"""
-        while not self._connection.poll():
-            self._event.wait()
-            self._event.clear()
 
+        await self._wait_for_input()
         return self._connection.recv()
 
     def fileno(self):
@@ -29,28 +35,28 @@ class Connection:
         self._connection.close()
 
     async def poll(self, timeout=0.0):
-        """Whether there is any input available to be read"""
+        """Whether there is an input available to be read"""
+
         if self._connection.poll():
             return True
 
         try:
-            await asyncio.wait_for(self._event.wait(), timeout=timeout)
+            await asyncio.wait_for(self._wait_for_input(), timeout=timeout)
         except asyncio.TimeoutError:
             return False
         return self._connection.poll()
 
     def send_bytes(self, buf, offset=0, size=None):
         """Send the bytes data from a bytes-like object"""
+
         self._connection.send_bytes(buf, offset, size)
 
     async def recv_bytes(self, maxlength=None):
         """
         Receive bytes data as a bytes object.
         """
-        while not self._connection.poll():
-            await self._event.wait()
-            self._event.clear()
 
+        await self._wait_for_input()
         return self._connection.recv_bytes(maxlength)
 
     async def recv_bytes_into(self, buf, offset=0):
@@ -58,8 +64,6 @@ class Connection:
         Receive bytes data into a writeable bytes-like object.
         Return the number of bytes read.
         """
-        while not self._connection.poll():
-            await self._event.wait()
-            self._event.clear()
 
+        await self._wait_for_input()
         return self._connection.recv_bytes_into(buf, offset)
